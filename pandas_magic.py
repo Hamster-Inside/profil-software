@@ -1,77 +1,92 @@
 import pandas as pd
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as Et
+from custom_exceptions import InvalidFileException
 
 
-def parse_children(children_str):
-    if pd.isna(children_str) or children_str == '':
-        return []
+class PandasData:
+    supported_files = ['.csv', '.xml', '.json']
 
-    children_list = []
-    for child_info in children_str.split(','):
-        parts = child_info.strip().split(' ')
-        if len(parts) == 2:
-            name, age = parts
-            children_list.append({'name': name, 'age': int(age.strip('()'))})
+    def __init__(self):
+        self.pandas_dataframe = pd.DataFrame()
 
-    return children_list
+    def convert_csv_to_dataframe(self, csv_file):
+        csv_dataframe = pd.read_csv(csv_file, delimiter=';', converters={'children': self._parse_children_})
+        return csv_dataframe
 
+    @staticmethod
+    def convert_xml_to_dataframe(self, xml_file):
+        tree = Et.parse(xml_file)
+        root = tree.getroot()
 
-def xml_to_dataframe(file_path):
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+        data = []
+        for user_elem in root.findall('user'):
+            user_data = {
+                'firstname': user_elem.find('firstname').text,
+                'telephone_number': user_elem.find('telephone_number').text,
+                'email': user_elem.find('email').text,
+                'password': user_elem.find('password').text,
+                'role': user_elem.find('role').text,
+                'created_at': user_elem.find('created_at').text
+            }
 
-    data = []
-    for user_elem in root.findall('user'):
-        user_data = {
-            'firstname': user_elem.find('firstname').text,
-            'telephone_number': user_elem.find('telephone_number').text,
-            'email': user_elem.find('email').text,
-            'password': user_elem.find('password').text,
-            'role': user_elem.find('role').text,
-            'created_at': user_elem.find('created_at').text
-        }
+            # Handle children
+            children_elem = user_elem.find('children')
+            if children_elem is not None:
+                children_data = []
+                for child_elem in children_elem.findall('child'):
+                    child_data = {
+                        'name': child_elem.find('name').text,
+                        'age': int(child_elem.find('age').text)
+                    }
+                    children_data.append(child_data)
+                user_data['children'] = children_data
+            else:
+                user_data['children'] = []
 
-        # Handle children
-        children_elem = user_elem.find('children')
-        if children_elem is not None:
-            children_data = []
-            for child_elem in children_elem.findall('child'):
-                child_data = {
-                    'name': child_elem.find('name').text,
-                    'age': int(child_elem.find('age').text)
-                }
-                children_data.append(child_data)
-            user_data['children'] = children_data
-        else:
-            user_data['children'] = []
+            data.append(user_data)
 
-        data.append(user_data)
+        return pd.DataFrame(data)
 
-    return pd.DataFrame(data)
-
-
-def get_dataframe_from_multiple_json_files(json_files):
-    all_json_dataframes = []
-    for json_file in json_files:
+    @staticmethod
+    def convert_json_to_dataframe(self, json_file):
         json_dataframe = pd.read_json(json_file)
-        all_json_dataframes.append(json_dataframe)
-    final_dataframe = pd.concat(all_json_dataframes, ignore_index=True)
-    return final_dataframe
+        return json_dataframe
+
+    def convert_to_dataframe(self, file):
+        if file.endswith('.csv'):
+            result_dataframe = self.convert_csv_to_dataframe(file)
+        elif file.endswith('.xml'):
+            result_dataframe = self.convert_xml_to_dataframe(file)
+        elif file.endswith('.json'):
+            result_dataframe = self.convert_json_to_dataframe(file)
+        else:
+            raise InvalidFileException(
+                f'Allowed only files: {[file_extension for file_extension in self.supported_files]}')
+        return result_dataframe
+
+    def add_dataframe(self, dataframe):
+        self.pandas_dataframe.append(dataframe, ignore_index=True, inplace=True)
+
+    def get_dataframe(self):
+        return self.pandas_dataframe
+
+    def delete_duplicates(self, list_of_col_names):
+        for col_name in list_of_col_names:
+            self.pandas_dataframe.drop_duplicates(subset=col_name, keep='first', inplace=True)
+
+   # def validate_col_data(self):
 
 
-def get_dataframe_from_multiple_csv_files(csv_files):
-    all_csv_dataframes = []
-    for csv_file in csv_files:
-        csv_dataframe = pd.read_csv(csv_file, delimiter=';', converters={'children': parse_children})
-        all_csv_dataframes.append(csv_dataframe)
-    final_dataframe = pd.concat(all_csv_dataframes, ignore_index=True)
-    return final_dataframe
+    @staticmethod
+    def _parse_children_(children_str):
+        if pd.isna(children_str) or children_str == '':
+            return []
 
+        children_list = []
+        for child_info in children_str.split(','):
+            parts = child_info.strip().split(' ')
+            if len(parts) == 2:
+                name, age = parts
+                children_list.append({'name': name, 'age': int(age.strip('()'))})
 
-def get_dataframe_from_multiple_xml_files(xml_files):
-    all_xml_dataframes = []
-    for xml_file in xml_files:
-        xml_dataframe = xml_to_dataframe(xml_file)
-        all_xml_dataframes.append(xml_dataframe)
-    final_dataframe = pd.concat(all_xml_dataframes, ignore_index=True)
-    return final_dataframe
+        return children_list
