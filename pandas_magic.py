@@ -20,6 +20,35 @@ def xml_to_dataframe(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
 
+    data = []
+    for user_elem in root.findall('user'):
+        user_data = {
+            'firstname': user_elem.find('firstname').text,
+            'telephone_number': user_elem.find('telephone_number').text,
+            'email': user_elem.find('email').text,
+            'password': user_elem.find('password').text,
+            'role': user_elem.find('role').text,
+            'created_at': user_elem.find('created_at').text
+        }
+
+        # Handle children
+        children_elem = user_elem.find('children')
+        if children_elem is not None:
+            children_data = []
+            for child_elem in children_elem.findall('child'):
+                child_data = {
+                    'name': child_elem.find('name').text,
+                    'age': int(child_elem.find('age').text)
+                }
+                children_data.append(child_data)
+            user_data['children'] = children_data
+        else:
+            user_data['children'] = []
+
+        data.append(user_data)
+
+    return pd.DataFrame(data)
+
 
 def get_dataframe_from_multiple_json_files(json_files):
     all_json_dataframes = []
@@ -40,4 +69,9 @@ def get_dataframe_from_multiple_csv_files(csv_files):
 
 
 def get_dataframe_from_multiple_xml_files(xml_files):
-    pass
+    all_xml_dataframes = []
+    for xml_file in xml_files:
+        xml_dataframe = xml_to_dataframe(xml_file)
+        all_xml_dataframes.append(xml_dataframe)
+    final_dataframe = pd.concat(all_xml_dataframes, ignore_index=True)
+    return final_dataframe
