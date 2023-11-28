@@ -1,4 +1,4 @@
-"""Module for checking password"""
+"""Module for checking email"""
 from abc import ABC, abstractmethod
 import re
 
