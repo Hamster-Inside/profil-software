@@ -14,7 +14,7 @@ class PandasData:
         return csv_dataframe
 
     @staticmethod
-    def convert_xml_to_dataframe(self, xml_file):
+    def convert_xml_to_dataframe(xml_file):
         tree = Et.parse(xml_file)
         root = tree.getroot()
 
@@ -48,34 +48,32 @@ class PandasData:
         return pd.DataFrame(data)
 
     @staticmethod
-    def convert_json_to_dataframe(self, json_file):
+    def convert_json_to_dataframe(json_file):
         json_dataframe = pd.read_json(json_file)
         return json_dataframe
 
-    def convert_to_dataframe(self, file):
-        if file.endswith('.csv'):
-            result_dataframe = self.convert_csv_to_dataframe(file)
-        elif file.endswith('.xml'):
-            result_dataframe = self.convert_xml_to_dataframe(file)
-        elif file.endswith('.json'):
-            result_dataframe = self.convert_json_to_dataframe(file)
+    def convert_to_dataframe(self, file_to_convert):
+        if file_to_convert.endswith('.csv'):
+            result_dataframe = self.convert_csv_to_dataframe(file_to_convert)
+        elif file_to_convert.endswith('.xml'):
+            result_dataframe = self.convert_xml_to_dataframe(file_to_convert)
+        elif file_to_convert.endswith('.json'):
+            result_dataframe = self.convert_json_to_dataframe(file_to_convert)
         else:
             raise InvalidFileException(
                 f'Allowed only files: {[file_extension for file_extension in self.supported_files]}')
         return result_dataframe
 
     def add_dataframe(self, dataframe):
-        self.pandas_dataframe.append(dataframe, ignore_index=True, inplace=True)
+        self.pandas_dataframe = pd.concat([self.pandas_dataframe, dataframe], ignore_index=True)
 
     def get_dataframe(self):
         return self.pandas_dataframe
 
-    def delete_duplicates(self, list_of_col_names):
+    def delete_duplicates_keep_first_based_on_created_at(self, list_of_col_names):
+        self.pandas_dataframe['created_at'] = pd.to_datetime(self.pandas_dataframe['created_at'])
         for col_name in list_of_col_names:
             self.pandas_dataframe.drop_duplicates(subset=col_name, keep='first', inplace=True)
-
-   # def validate_col_data(self):
-
 
     @staticmethod
     def _parse_children_(children_str):
