@@ -10,10 +10,11 @@ csv_dataframe = pandas_magic.get_dataframe_from_multiple_csv_files(csv_files)
 xml_dataframe = pandas_magic.get_dataframe_from_multiple_xml_files(xml_files)
 json_dataframe = pandas_magic.get_dataframe_from_multiple_json_files(json_files)
 
-# Concatenate all dataframes
-#all_dataframes = csv_dataframe + xml_dataframe + json_dataframe
+all_dataframes = pd.concat([csv_dataframe, xml_dataframe, json_dataframe], ignore_index=True)
+all_dataframes['created_at'] = pd.to_datetime(all_dataframes['created_at'])
 
-# Merge dataframes, drop duplicates, and handle telephone numbers
-# merged_df = pd.concat(all_dataframes, ignore_index=True)
+# drop duplicates
+all_dataframes.drop_duplicates(subset='telephone_number', keep='first', inplace=True)
+all_dataframes.drop_duplicates(subset='email', keep='first', inplace=True)
 
-print(xml_dataframe)
+print(all_dataframes)
