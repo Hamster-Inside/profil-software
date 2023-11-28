@@ -1,6 +1,10 @@
 import pandas as pd
 import xml.etree.ElementTree as Et
 from custom_exceptions import InvalidFileException
+import re
+
+from validators.email_validator import EmailValidator
+from validators.validator import ValidationError
 
 
 class PandasData:
@@ -74,6 +78,7 @@ class PandasData:
         self.pandas_dataframe['created_at'] = pd.to_datetime(self.pandas_dataframe['created_at'])
         for col_name in list_of_col_names:
             self.pandas_dataframe.drop_duplicates(subset=col_name, keep='first', inplace=True)
+        self.pandas_dataframe = self.pandas_dataframe.reset_index(drop=True)
 
     @staticmethod
     def _parse_children_(children_str):
@@ -88,3 +93,38 @@ class PandasData:
                 children_list.append({'name': name, 'age': int(age.strip('()'))})
 
         return children_list
+
+    def clean_all_telephone_numbers(self):
+        self.pandas_dataframe['telephone_number'] = self.pandas_dataframe['telephone_number'].apply(
+            self.clean_telephone_number)
+
+    def delete_none_values(self, column_names):
+        self.pandas_dataframe = self.pandas_dataframe.dropna(subset=column_names).reset_index(drop=True)
+
+    def change_invalid_emails_to_none(self):
+        self.pandas_dataframe['email'] = self.pandas_dataframe['email'].apply(
+            self.validate_email)
+
+    @staticmethod
+    def validate_email(email):
+        try:
+            EmailValidator(email)
+            return email
+        except ValidationError:
+            return None
+
+    @staticmethod
+    def clean_telephone_number(telephone_number):
+        # Remove non-digit characters
+        cleaned_number = re.sub(r'\D', '', str(telephone_number))
+
+        # Remove leading zeros
+        cleaned_number = cleaned_number.lstrip('0')
+
+        # Ensure the number has 9 digits
+        if len(cleaned_number) == 9:
+            return cleaned_number
+        elif len(cleaned_number) > 9:
+            return cleaned_number[-9:]
+        else:
+            return None
