@@ -34,7 +34,14 @@ class GroupByAgeCommand(Command):
 
 class PrintChildrenCommand(Command):
     def execute(self, user_row=None):
-        print(user_row)
+        children = user_row['children'].values[0]
+        if not children:
+            print("You don't have children")
+            return
+        sorted_children = sorted(children, key=lambda x: x.get('name').lower())
+        for child in sorted_children:
+            print(f'{child.get('name')}, {child.get('age')}')
+
 
 
 class FindSimilarChildrenCommand(Command):
