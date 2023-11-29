@@ -134,3 +134,10 @@ class PandasData:
             return cleaned_number[-9:]
         else:
             return None
+
+    @staticmethod
+    def has_children(single_dataframe):
+        children = single_dataframe['children'].values[0]
+        if not children:
+            return False
+        return True

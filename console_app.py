@@ -15,7 +15,7 @@ class ConsoleApp:
             'print-oldest-account': PrintOldestAccountCommand(),
             'group-by-age': GroupByAgeCommand(),
             'print-children': PrintChildrenCommand(),
-            'find-similar-children': FindSimilarChildrenCommand(),
+            'find-similar-children-by-age': FindSimilarChildrenCommand(),
             'create-database': CreateDatabaseCommand(),
         }
 

@@ -35,7 +35,7 @@ class GroupByAgeCommand(Command):
 class PrintChildrenCommand(Command):
     def execute(self, user_row=None):
         children = user_row['children'].values[0]
-        if not children:
+        if not self.data.has_children(user_row):
             print("You don't have children")
             return
         sorted_children = sorted(children, key=lambda x: x.get('name').lower())
@@ -43,10 +43,14 @@ class PrintChildrenCommand(Command):
             print(f'{child.get('name')}, {child.get('age')}')
 
 
-
 class FindSimilarChildrenCommand(Command):
     def execute(self, user_row=None):
-        print("Finding similar children by age")
+        if not self.data.has_children(user_row):
+            print("You don't have children")
+            return
+        current_user_children_ages = [child['age'] for children_list in user_row['children'] for child in children_list]
+        for _, row in self.data.pandas_dataframe.iterrows():
+            pass
 
 
 class CreateDatabaseCommand(Command):
