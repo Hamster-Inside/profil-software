@@ -78,7 +78,7 @@ class CreateDatabaseCommand(Command):
         if os.path.isfile(db_name):
             print(
                 f'Database {db_name} already exists. If you want to refresh it, '
-                f'you must delete current one and try again')
+                f'you must delete current one and try again.')
             return
 
         with SQLiteDBManager(db_name) as cursor:
