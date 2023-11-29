@@ -1,7 +1,9 @@
+""" Custom Context Manager for operating on SQLite3 DB"""
 import sqlite3
 
 
 class SQLiteDBManager:
+    """ Context Manager for SQLite"""
     def __init__(self, db_name='user_data.db'):
         self.db_name = db_name
         self.conn = None
