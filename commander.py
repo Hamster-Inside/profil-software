@@ -80,15 +80,52 @@ class CreateDatabaseCommand(Command):
                 f'Database {db_name} already exists. If you want to refresh it, '
                 f'you must delete current one and try again')
             return
+
         with SQLiteDBManager(db_name) as cursor:
             cursor.execute('''
-                   CREATE TABLE IF NOT EXISTS child (
-                       child_id INTEGER PRIMARY KEY,
-                       name TEXT,
-                       age INTEGER
-                   )
-               ''')
+                CREATE TABLE IF NOT EXISTS child (
+                    child_id INTEGER PRIMARY KEY,
+                    name TEXT,
+                    age INTEGER,
+                    child_foreign_key INTEGER
+                )
+            ''')
 
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user (
+                    user_id INTEGER PRIMARY KEY,
+                    firstname TEXT,
+                    telephone_number TEXT,
+                    email TEXT,
+                    password TEXT,
+                    role TEXT,
+                    created_at DATE,
+                    children_id INTEGER,
+                    FOREIGN KEY (children_id) REFERENCES child (child_foreign_key)
+                )
+            ''')
 
+            for index, row in self.data.pandas_dataframe.iterrows():
+                current_key = index+1
+                firstname = row['firstname']
+                telephone_number = row['telephone_number']
+                email = row['email']
+                password = row['password']
+                role = row['role']
+                created_at = row['created_at'].to_pydatetime()
+                cursor.execute('''
+                    INSERT INTO user 
+                    (firstname, telephone_number, email, password, role, created_at, children_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                               (firstname, telephone_number, email, password, role, created_at, current_key))
+
+                if self.data.has_children(row):
+                    for child in row['children']:
+                        child_name = child.get('name')
+                        child_age = child.get('age')
+                        cursor.execute('INSERT INTO child (name, age, child_foreign_key) VALUES (?, ?, ?)',
+                                       (child_name, child_age, current_key))
+                else:
+                    cursor.execute('UPDATE user SET children_id = NULL WHERE user_id = ?', (current_key,))
 
             print("SQLite DB created. But at the moment data is still used from files. DB is as a backup")
