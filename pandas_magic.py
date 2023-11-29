@@ -1,13 +1,15 @@
-import pandas as pd
-import xml.etree.ElementTree as Et
-from custom_exceptions import InvalidFileException
-import re
+""" Module for validation and creation of data to process to dataframe """
 
+import re
+import xml.etree.ElementTree as Et
+import pandas as pd
+from custom_exceptions import InvalidFileException
 from validators.email_validator import EmailValidator
 from validators.validator import ValidationError
 
 
 class PandasData:
+    """ class for operating on data files and converting them to pandas dataframe """
     supported_files = ['.csv', '.xml', '.json']
     _instance = None
 
@@ -20,7 +22,8 @@ class PandasData:
         self.pandas_dataframe = pd.DataFrame()
 
     def convert_csv_to_dataframe(self, csv_file):
-        csv_dataframe = pd.read_csv(csv_file, delimiter=';', converters={'children': self._parse_children_})
+        csv_dataframe = pd.read_csv(csv_file, delimiter=';',
+                                    converters={'children': self._parse_children_})
         return csv_dataframe
 
     @staticmethod
@@ -71,7 +74,8 @@ class PandasData:
             result_dataframe = self.convert_json_to_dataframe(file_to_convert)
         else:
             raise InvalidFileException(
-                f'Allowed only files: {[file_extension for file_extension in self.supported_files]}')
+                f'Allowed only files: '
+                f'{self.supported_files}')
         return result_dataframe
 
     def add_dataframe(self, dataframe):
@@ -105,7 +109,8 @@ class PandasData:
             self.clean_telephone_number)
 
     def delete_none_values(self, column_names):
-        self.pandas_dataframe = self.pandas_dataframe.dropna(subset=column_names).reset_index(drop=True)
+        self.pandas_dataframe = self.pandas_dataframe.dropna(
+            subset=column_names).reset_index(drop=True)
 
     def change_invalid_emails_to_none(self):
         self.pandas_dataframe['email'] = self.pandas_dataframe['email'].apply(
@@ -130,10 +135,9 @@ class PandasData:
         # Ensure the number has 9 digits
         if len(cleaned_number) == 9:
             return cleaned_number
-        elif len(cleaned_number) > 9:
+        if len(cleaned_number) > 9:
             return cleaned_number[-9:]
-        else:
-            return None
+        return None
 
     @staticmethod
     def has_children(single_dataframe_or_series):
