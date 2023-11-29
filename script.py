@@ -5,13 +5,6 @@ from pandas_magic import PandasData
 from file_operations import get_file_list_deep
 
 
-class Login(Action):
-    def __call__(self, parser: ArgumentParser, namespace: Namespace, values: Any, optional_string):
-        if values is None:
-            pass
-        setattr(namespace, self.dest, values)
-
-
 def main(args_from_user):
     files_with_data = get_file_list_deep('data', ['.csv', '.xml', '.json'])
 
@@ -27,8 +20,6 @@ def main(args_from_user):
     data.delete_duplicates_keep_first_based_on_created_at(['telephone_number', 'email'])
 
     app.run_command(args_from_user.command)
-
-    # print(data.pandas_dataframe)
 
 
 if __name__ == '__main__':

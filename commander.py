@@ -1,11 +1,17 @@
+from pandas_magic import PandasData
+
+
 class Command:
+    def __init__(self):
+        self.data = PandasData()
+
     def execute(self):
         pass
 
 
 class PrintAllAccountsCommand(Command):
     def execute(self):
-        print("Printing all accounts")
+        print(self.data.pandas_dataframe)
 
 
 class PrintOldestAccountCommand(Command):
