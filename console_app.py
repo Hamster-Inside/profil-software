@@ -29,7 +29,7 @@ class ConsoleApp:
             print('Must be admin to use this method')
             return
         if command:
-            command.execute()
+            command.execute(self.user_row)
         else:
             print(f'Nie ma takiej metody: {command_name}')
 

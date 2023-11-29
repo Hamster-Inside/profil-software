@@ -11,7 +11,6 @@ class Command:
 
 class PrintAllAccountsCommand(Command):
     def execute(self, user_row=None):
-        print(self.data.pandas_dataframe)
         print(len(self.data.pandas_dataframe))
 
 
@@ -35,7 +34,7 @@ class GroupByAgeCommand(Command):
 
 class PrintChildrenCommand(Command):
     def execute(self, user_row=None):
-        pass
+        print(user_row)
 
 
 class FindSimilarChildrenCommand(Command):
