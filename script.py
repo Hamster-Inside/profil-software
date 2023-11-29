@@ -19,7 +19,7 @@ def main(args_from_user):
     data.delete_none_values(['telephone_number', 'email'])
     data.delete_duplicates_keep_first_based_on_created_at(['telephone_number', 'email'])
 
-    app.run_command(args_from_user.command)
+    app.run_command(args_from_user.command, args_from_user.login, args_from_user.password)
 
 
 if __name__ == '__main__':
