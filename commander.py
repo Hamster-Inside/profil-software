@@ -11,7 +11,7 @@ class Command:
 
 class PrintAllAccountsCommand(Command):
     def execute(self):
-        print(self.data.pandas_dataframe)
+        print(len(self.data.pandas_dataframe))
 
 
 class PrintOldestAccountCommand(Command):
