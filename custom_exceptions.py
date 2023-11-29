@@ -1,3 +1,6 @@
+""" Custom Exceptions module """
+
+
 class CustomError(Exception):
     """ Base class for custom exceptions """
 
