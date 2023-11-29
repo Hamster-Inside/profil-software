@@ -8,6 +8,7 @@ class ConsoleApp:
     def __init__(self):
         self.data = PandasData()
         self.is_admin = False
+        self.user_row = None
         self.admin_only_command_list = ['print-all-accounts', 'print-oldest-account', 'group-by-age']
         self.commands = {
             'print-all-accounts': PrintAllAccountsCommand(),
@@ -24,7 +25,7 @@ class ConsoleApp:
             print("Invalid Login")
             return
         command = self.commands.get(command_name)
-        if command_name in self.admin_only_command_list and not self.is_admin:
+        if command_name in self.admin_only_command_list and not self.user_row['role'].values[0] == 'admin':
             print('Must be admin to use this method')
             return
         if command:
@@ -42,10 +43,8 @@ class ConsoleApp:
         if login not in self.data.pandas_dataframe[login_type].values:
             return False
 
-        user_row = self.data.pandas_dataframe[self.data.pandas_dataframe[login_type] == login]
-        if user_row['role'].values[0] == 'admin':
-            self.is_admin = True
-        return user_row['password'].values[0] == password
+        self.user_row = self.data.pandas_dataframe[self.data.pandas_dataframe[login_type] == login]
+        return self.user_row['password'].values[0] == password
 
     @staticmethod
     def is_phone_number(input_string):
