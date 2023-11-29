@@ -16,7 +16,10 @@ class PrintAllAccountsCommand(Command):
 
 class PrintOldestAccountCommand(Command):
     def execute(self):
-        print("Printing the oldest account")
+        oldest_account_row = self.data.pandas_dataframe['created_at'].idxmin()
+        print(f'name: {self.data.pandas_dataframe.loc[oldest_account_row, 'firstname']} \n'
+              f'email_address: {self.data.pandas_dataframe.loc[oldest_account_row, 'email']} \n'
+              f'created_at: {self.data.pandas_dataframe.loc[oldest_account_row, 'created_at']}')
 
 
 class GroupByAgeCommand(Command):
