@@ -16,7 +16,7 @@ class ConsoleApp:
             'group-by-age': GroupByAgeCommand(),
             'print-children': PrintChildrenCommand(),
             'find-similar-children-by-age': FindSimilarChildrenCommand(),
-            'create-database': CreateDatabaseCommand(),
+            'create_database': CreateDatabaseCommand(),
         }
 
     def run_command(self, command_name, login, password):
@@ -39,10 +39,8 @@ class ConsoleApp:
             login_type = 'telephone_number'
         else:
             login_type = 'email'
-
         if login not in self.data.pandas_dataframe[login_type].values:
             return False
-
         self.user_row = self.data.pandas_dataframe[self.data.pandas_dataframe[login_type] == login]
         return self.user_row['password'].values[0] == password
 
