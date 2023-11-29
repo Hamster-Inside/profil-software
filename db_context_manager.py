@@ -15,7 +15,7 @@ class SQLiteDBManager:
     def __exit__(self, exc_type, exc_value, traceback):
         if self.conn:
             if exc_type is None:
-                self.conn.commit()  # Commit changes if no exception occurred
+                self.conn.commit()
             else:
-                self.conn.rollback()  # Rollback changes if an exception occurred
+                self.conn.rollback()
             self.conn.close()
