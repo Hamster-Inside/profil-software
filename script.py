@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, Namespace, RawTextHelpFormatter, Action
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter, Action, ArgumentError
 from typing import Any
 from console_app import ConsoleApp
 from pandas_magic import PandasData
