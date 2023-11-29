@@ -136,8 +136,12 @@ class PandasData:
             return None
 
     @staticmethod
-    def has_children(single_dataframe):
-        children = single_dataframe['children'].values[0]
-        if not children:
-            return False
-        return True
+    def has_children(single_dataframe_or_series):
+        if isinstance(single_dataframe_or_series, pd.DataFrame):
+            children = single_dataframe_or_series['children'].values[0]
+            if children:
+                return True
+        elif isinstance(single_dataframe_or_series, pd.Series):
+            if len(single_dataframe_or_series['children']) > 0:
+                return True
+        return False
