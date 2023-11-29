@@ -1,22 +1,33 @@
+""" Module for commands """
+import os
 from pandas_magic import PandasData
 from db_context_manager import SQLiteDBManager
-import os
 
 
 class Command:
+    """ Base class for subcommands """
+
     def __init__(self):
         self.data = PandasData()
 
     def execute(self, user_row=None):
-        pass
+        """ base execute method """
 
 
 class PrintAllAccountsCommand(Command):
+    """ Print the total number of valid accounts.
+    Result as integer"""
+
     def execute(self, user_row=None):
         print(len(self.data.pandas_dataframe))
 
 
 class PrintOldestAccountCommand(Command):
+    """ Print the oldest account based on created_at
+    (ex: "name: Boris
+          email_address: boris@gmail.com
+          created_at: 1990-12-12 13:20:00") """
+
     def execute(self, user_row=None):
         oldest_account_row = self.data.pandas_dataframe['created_at'].idxmin()
         print(f'name: {self.data.pandas_dataframe.loc[oldest_account_row, 'firstname']} \n'
@@ -25,6 +36,10 @@ class PrintOldestAccountCommand(Command):
 
 
 class GroupByAgeCommand(Command):
+    """ Group children by age and display relevant information.
+    (ex: "age: 12, count: 5
+          age: 10, count: 7") """
+
     def execute(self, user_row=None):
         df_expanded = self.data.pandas_dataframe.explode('children')
         df_expanded = df_expanded[df_expanded['children'].notna()]
@@ -35,6 +50,11 @@ class GroupByAgeCommand(Command):
 
 
 class PrintChildrenCommand(Command):
+    """ Display information about the user's children.
+    Sort children alphabetically by name.
+    (ex: "Adam, 2
+          Sally, 12") """
+
     def execute(self, user_row=None):
         children = user_row['children'].values[0]
         if not self.data.has_children(user_row):
@@ -46,6 +66,12 @@ class PrintChildrenCommand(Command):
 
 
 class FindSimilarChildrenCommand(Command):
+    """ Find users with children of the same age as at least one own child,
+    print the user and all of his children data.
+    Sort children alphabetically by name.
+    (ex: "Brock, 789543123: Bart, 4; Olive, 2
+          John, 432764512: Sally, 2") """
+
     def execute(self, user_row=None):
         if not self.data.has_children(user_row):
             print("You don't have children")
@@ -73,6 +99,12 @@ class FindSimilarChildrenCommand(Command):
 
 
 class CreateDatabaseCommand(Command):
+    """ Based on data from pandas dataframe creates SQLite DB.
+    Tables:
+    *user
+    *child
+    They are connected by a foreignkey. """
+
     def execute(self, user_row=None):
         db_name = 'user_data.db'
         if os.path.isfile(db_name):
@@ -106,7 +138,7 @@ class CreateDatabaseCommand(Command):
             ''')
 
             for index, row in self.data.pandas_dataframe.iterrows():
-                current_key = index+1
+                current_key = index + 1
                 firstname = row['firstname']
                 telephone_number = row['telephone_number']
                 email = row['email']
@@ -117,15 +149,20 @@ class CreateDatabaseCommand(Command):
                     INSERT INTO user 
                     (firstname, telephone_number, email, password, role, created_at, children_id) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                               (firstname, telephone_number, email, password, role, created_at, current_key))
+                               (firstname, telephone_number, email,
+                                password, role, created_at, current_key))
 
                 if self.data.has_children(row):
                     for child in row['children']:
                         child_name = child.get('name')
                         child_age = child.get('age')
-                        cursor.execute('INSERT INTO child (name, age, child_foreign_key) VALUES (?, ?, ?)',
-                                       (child_name, child_age, current_key))
+                        cursor.execute(
+                            'INSERT INTO child (name, age, child_foreign_key) VALUES (?, ?, ?)',
+                            (child_name, child_age, current_key))
                 else:
-                    cursor.execute('UPDATE user SET children_id = NULL WHERE user_id = ?', (current_key,))
+                    cursor.execute('UPDATE user SET children_id = NULL WHERE user_id = ?',
+                                   (current_key,))
 
-            print("SQLite DB created. But at the moment data is still used from files. DB is as a backup")
+            print("SQLite DB created. "
+                  "But at the moment data is still used from files. "
+                  "DB is as a backup")
