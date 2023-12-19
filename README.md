@@ -1,9 +1,3 @@
-Arkadiusz Budkowski
-
-arkadiusz.budkowski.1990@gmail.com
-
-796-070-128
-
 How to use the script:
 
 1) Type in console:
